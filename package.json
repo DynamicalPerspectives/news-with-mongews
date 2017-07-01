@@ -1,0 +1,31 @@
+{
+  "name": "news-with-mongews",
+  "version": "1.0.0",
+  "description": "scrape website articles into a db and add and delete notes",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DynamicalPerspectives/news-with-mongews.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DynamicalPerspectives/news-with-mongews/issues"
+  },
+  "homepage": "https://github.com/DynamicalPerspectives/news-with-mongews#readme",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "cheerio": "^1.0.0-rc.1",
+    "express": "^4.15.3",
+    "express-handlebars": "^3.0.0",
+    "mongojs": "^2.4.0",
+    "mongoose": "^4.11.0",
+    "request": "^2.81.0"
+  },
+  "devDependencies": {}
+}
