@@ -9,16 +9,16 @@ var ListingSchema = new Schema({
   title: {
     type: String,
     required: true
-  // },
-  // // price is a required string
+  },
+  // price is a required string
   // price: {
   //   type: String,
   //   required: true
   // },
-  // // price is a required string
+  // price is a required string
   // date: {
   //   type: String,
-  //   required: true
+  // //   required: true
   // },
   // link is a required string
   link: {

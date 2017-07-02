@@ -4,9 +4,7 @@ $.getJSON("/listings", function(data) {
   for (var i = 0; i < data.length; i++) {
     // Display the apropos information on the page
     console.log(data[i]);
-  //   $("#listings").append("<p data-id='" + data[i]._id + "'>" + data[i].title + "<br />" + data[i].price + "</p>");
-  // }
-    $("#listings").append("<p data-id='" + data[i]._id + "'>" + data[i].title + "<br />" + data[i].link + "</p>");
+    $("#listings").append("<p data-id='" + data[i]._id + "'>" + data[i].title + "<br />" + data[i].price + "</p>");
   }
 });
 

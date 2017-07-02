@@ -1,6 +1,6 @@
-/* Showing Mongoose's "Populated" Method (18.3.8)
- * INSTRUCTOR ONLY
- * =============================================== */
+// * Showing Mongoose's "Populated" Method (18.3.8)
+//  * INSTRUCTOR ONLY
+//  * =============================================== */
 
 // Dependencies
 var express = require("express");
@@ -27,7 +27,11 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static("public"));
 
 // Database configuration with mongoose
-mongoose.connect("mongodb://localhost/week18day3mongoose");
+// mongoose.connect("mongodb://heroku_qbjjrjm9:p141ir5l1ffqhn9cpk2oaj0nrc@ds145312.mlab.com:45312/heroku_qbjjrjm9");
+// mongoose.connect("mongodb://heroku_qbjjrjm9:p141ir5l1ffqhn9cpk2oaj0nrc@ds145312.mlab.com:45312/heroku_qbjjrjm9");
+// var db = mongoose.connection;
+// Database configuration with mongoose
+mongoose.connect();
 var db = mongoose.connection;
 
 // Show any mongoose errors
@@ -72,7 +76,7 @@ app.get("/scrape", function(req, res) {
         entry.save(function(err, doc) {
           // Log any errors
           if (err) {
-            console.log(err// Or log the doc
+            console.log(err // Or log the doc
             );
           } else {
             console.log(doc);
@@ -91,7 +95,7 @@ app.get("/listings", function(req, res) {
   Listing.find({}, function(error, doc) {
     // Log any errors
     if (error) {
-      console.log(error// Or send the doc to the browser as a json object
+      console.log(error // Or send the doc to the browser as a json object
       );
     } else {
       res.json(doc);
@@ -109,7 +113,7 @@ app.get("/listings/:id", function(req, res) {
     .exec(function(error, doc) {
     // Log any errors
     if (error) {
-      console.log(error// Otherwise, send the doc to the browser as a json object
+      console.log(error // Otherwise, send the doc to the browser as a json object
       );
     } else {
       res.json(doc);
@@ -126,7 +130,7 @@ app.post("/listings/:id", function(req, res) {
   newNote.save(function(error, doc) {
     // Log any errors
     if (error) {
-      console.log(error// Otherwise
+      console.log(error // Otherwise
       );
     } else {
       // Use the article id to find and update it's note
