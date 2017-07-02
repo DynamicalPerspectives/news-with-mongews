@@ -1,5 +1,5 @@
 /* Showing Mongoose's "Populated" Method (18.3.8)
- *
+ * INSTRUCTOR ONLY
  * =============================================== */
 
 // Dependencies
@@ -16,15 +16,12 @@ var cheerio = require("cheerio");
 // Set mongoose to leverage built in JavaScript ES6 Promises
 mongoose.Promise = Promise;
 
-
 // Initialize Express
 var app = express();
 
 // Use morgan and body parser with our app
 app.use(logger("dev"));
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
+app.use(bodyParser.urlencoded({extended: false}));
 
 // Make public a static dir
 app.use(express.static("public"));
@@ -34,50 +31,50 @@ mongoose.connect("mongodb://localhost/week18day3mongoose");
 var db = mongoose.connection;
 
 // Show any mongoose errors
-db.on("error", function (error) {
+db.on("error", function(error) {
   console.log("Mongoose Error: ", error);
 });
 
 // Once logged in to the db through mongoose, log a success message
-db.once("open", function () {
+db.once("open", function() {
   console.log("Mongoose connection successful.");
 });
-
 
 // Routes
 // ======
 
-// A GET request to scrape the echojs website
-app.get("/scrape", function (req, res) {
-  // First, we grab the body of the html with request
-  request("https://raleigh.craigslist.org/search/sss?sort=rel&query=pinball", function (error, response, html) {
-    // Then, we load that into cheerio and save it to $ for a shorthand selector
+app.get("/scrape", function(req, res) {
+  // Make a request for the news section of ycombinator
+  request("https://jezebel.com/", function(error, response, html) {
+    // Load the html body from request into cheerio
     var $ = cheerio.load(html);
-    // Now, we grab every h2 within an article tag, and do the following:
-    $(".result-info").each(function (i, element) {
+    // For each element with a "title" class
+    // $(".title").each(function(i, element) {
+    $("h1.headline.entry-title.js_entry-title").each(function(i, element) {
+      // Save the text of each link enclosed in the current element
+      var title = $(this).children("a").text();
+      // Save the href value of each link enclosed in the current element
+      var link = $(this).children("a").attr("href");
 
-      if ($(this).find(".result-price").text() !== "") {
+      // If this title element had both a title and a link
+      if (title && link) {
         // Save an empty result object
         var result = {};
-
         // Add the text and href of every link, and save them as properties of the result object
-        result.title = $(this).find(".result-title").text();
-        result.price = $(this).find(".result-price").text();
+        result.title = $(this).children("a").text();
         result.link = $(this).children("a").attr("href");
-        result.date = $(this).find(".result-date").text();
 
         // Using our Article model, create a new entry
         // This effectively passes the result object to the entry (and the title and link)
         var entry = new Listing(result);
 
         // Now, save that entry to the db
-        entry.save(function (err, doc) {
+        entry.save(function(err, doc) {
           // Log any errors
           if (err) {
-            console.log(err);
-          }
-          // Or log the doc
-          else {
+            console.log(err// Or log the doc
+            );
+          } else {
             console.log(doc);
           }
         });
@@ -89,77 +86,68 @@ app.get("/scrape", function (req, res) {
 });
 
 // This will get the articles we scraped from the mongoDB
-app.get("/listings", function (req, res) {
+app.get("/listings", function(req, res) {
   // Grab every doc in the Articles array
-  Listing.find({}, function (error, doc) {
+  Listing.find({}, function(error, doc) {
     // Log any errors
     if (error) {
-      console.log(error);
-    }
-    // Or send the doc to the browser as a json object
-    else {
+      console.log(error// Or send the doc to the browser as a json object
+      );
+    } else {
       res.json(doc);
     }
   });
 });
 
 // Grab an article by it's ObjectId
-app.get("/listings/:id", function (req, res) {
+app.get("/listings/:id", function(req, res) {
   // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
-  Listing.findOne({
-      "_id": req.params.id
-    })
-    // ..and populate all of the notes associated with it
+  Listing.findOne({"_id": req.params.id})
+  // ..and populate all of the notes associated with it
     .populate("note")
-    // now, execute our query
-    .exec(function (error, doc) {
-      // Log any errors
-      if (error) {
-        console.log(error);
-      }
-      // Otherwise, send the doc to the browser as a json object
-      else {
-        res.json(doc);
-      }
-    });
-});
-
-
-// Create a new note or replace an existing note
-app.post("/listings/:id", function (req, res) {
-  // Create a new note and pass the req.body to the entry
-  var newNote = new Note(req.body);
-
-  // And save the new note the db
-  newNote.save(function (error, doc) {
+  // now, execute our query
+    .exec(function(error, doc) {
     // Log any errors
     if (error) {
-      console.log(error);
-    }
-    // Otherwise
-    else {
-      // Use the article id to find and update it's note
-      Listing.findOneAndUpdate({
-          "_id": req.params.id
-        }, {
-          "note": doc._id
-        })
-        // Execute the above query
-        .exec(function (err, doc) {
-          // Log any errors
-          if (err) {
-            console.log(err);
-          } else {
-            // Or send the document to the browser
-            res.send(doc);
-          }
-        });
+      console.log(error// Otherwise, send the doc to the browser as a json object
+      );
+    } else {
+      res.json(doc);
     }
   });
 });
 
+// Create a new note or replace an existing note
+app.post("/listings/:id", function(req, res) {
+  // Create a new note and pass the req.body to the entry
+  var newNote = new Note(req.body);
+
+  // And save the new note the db
+  newNote.save(function(error, doc) {
+    // Log any errors
+    if (error) {
+      console.log(error// Otherwise
+      );
+    } else {
+      // Use the article id to find and update it's note
+      Listing.findOneAndUpdate({
+        "_id": req.params.id
+      }, {"note": doc._id})
+      // Execute the above query
+        .exec(function(err, doc) {
+        // Log any errors
+        if (err) {
+          console.log(err);
+        } else {
+          // Or send the document to the browser
+          res.send(doc);
+        }
+      });
+    }
+  });
+});
 
 // Listen on port 3000
-app.listen(3000, function () {
+app.listen(3000, function() {
   console.log("App running on port 3000!");
 });
