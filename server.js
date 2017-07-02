@@ -1,287 +1,165 @@
-/* Scraping into DB (18.2.5)
- * ========================== */
+/* Showing Mongoose's "Populated" Method (18.3.8)
+ *
+ * =============================================== */
 
 // Dependencies
-// var express = require("express");
-// var handlesbars = require ("express-handlebars");
-// var mongojs = require("mongojs");
-// // Require request and cheerio. This makes the scraping possible
-// var request = require("request");
-// var cheerio = require("cheerio");
-var express = require('express');
+var express = require("express");
+var bodyParser = require("body-parser");
+var logger = require("morgan");
+var mongoose = require("mongoose");
+// Requiring our Note and Article models
+var Note = require("./models/Note.js");
+var Listing = require("./models/Listing.js");
+// Our scraping tools
+var request = require("request");
+var cheerio = require("cheerio");
+// Set mongoose to leverage built in JavaScript ES6 Promises
+mongoose.Promise = Promise;
+
+
+// Initialize Express
 var app = express();
-var bodyParser = require('body-parser');
-var logger = require('morgan');
-var mongoose = require('mongoose');
-var mongojs =  require ("mongojs")
-var request = require('request');
-var cheerio = require('cheerio');
 
-var Note = require("./models/note.js");
-var Article = require("./models/article.js");
-
-
-app.use(logger('dev'));
+// Use morgan and body parser with our app
+app.use(logger("dev"));
 app.use(bodyParser.urlencoded({
   extended: false
 }));
 
-// Initialize Express
+// Make public a static dir
+app.use(express.static("public"));
 
-// PUBLIC STATIC DIRECTORY //
-// var app = express();
-// app.use(express.static('public'));
+// Database configuration with mongoose
+mongoose.connect("mongodb://localhost/week18day3mongoose");
+var db = mongoose.connection;
 
+// Show any mongoose errors
+db.on("error", function (error) {
+  console.log("Mongoose Error: ", error);
+});
 
-
-// Database configuration
-var databaseUrl = "jeznews";
-var collections = ["newsData"];
-
-// Hook mongojs configuration to the db variable
-var db = mongojs(databaseUrl, collections);
-db.on("error", function(error) {
-  console.log("Database Error:", error);
+// Once logged in to the db through mongoose, log a success message
+db.once("open", function () {
+  console.log("Mongoose connection successful.");
 });
 
 
-// Main route (simple Hello World Message)
-app.get("/", function(req, res) {
-  res.send("Hello world");
-});
+// Routes
+// ======
 
-// Retrieve data from the db
-app.get("/all", function(req, res) {
-  // Find all results from the newsData collection in the db
-  db.newsData.find({}, function(error, found) {
-    // Throw any errors to the console
-    if (error) {
-      console.log(error);
-    }
-    // If there are no errors, send the data to the browser as a json
-    else {
-      res.json(found);
-    }
-  });
-});
-
-// Scrape data from one site and place it into the mongodb db
-app.get("/scrape", function(req, res) {
-  // Make a request for the news section of ycombinator
-  request( "https://www.jezebel.com/", function(error, response, html) {
-    // Load the html body from request into cheerio
+// A GET request to scrape the echojs website
+app.get("/scrape", function (req, res) {
+  // First, we grab the body of the html with request
+  request("https://raleigh.craigslist.org/search/sss?sort=rel&query=pinball", function (error, response, html) {
+    // Then, we load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load(html);
+    // Now, we grab every h2 within an article tag, and do the following:
+    $(".result-info").each(function (i, element) {
 
-    // / Select each instance of the HTML body that you want to scrape
-    // NOTE: Cheerio selectors function similarly to jQuery's selectors,
-    // but be sure to visit the package's npm page to see how it works
+      if ($(this).find(".result-price").text() !== "") {
+        // Save an empty result object
+        var result = {};
 
-    $('h1.headline.entry-title.js_entry-title').each(function(i, element){
+        // Add the text and href of every link, and save them as properties of the result object
+        result.title = $(this).find(".result-title").text();
+        result.price = $(this).find(".result-price").text();
+        result.link = $(this).children("a").attr("href");
+        result.date = $(this).find(".result-date").text();
 
-      var link = $(element).children().attr("href");
-      var title = $(element).children().text();
-      // If this title element had both a title and a link
-      if (title && link) {
-        // Save the data in the newsData db
-        db.newsData.save({
-          title: title,
-          link: link
-        },
-        function(error, saved) {
-          // If there's an error during this query
-          if (error) {
-            // Log the error
-            console.log(error);
+        // Using our Article model, create a new entry
+        // This effectively passes the result object to the entry (and the title and link)
+        var entry = new Listing(result);
+
+        // Now, save that entry to the db
+        entry.save(function (err, doc) {
+          // Log any errors
+          if (err) {
+            console.log(err);
           }
-          // Otherwise,
+          // Or log the doc
           else {
-            // Log the saved data
-            console.log(saved);
+            console.log(doc);
           }
         });
       }
     });
   });
-
-  // This will send a "Scrape Complete" message to the browser
+  // Tell the browser that we finished scraping the text
   res.send("Scrape Complete");
+});
+
+// This will get the articles we scraped from the mongoDB
+app.get("/listings", function (req, res) {
+  // Grab every doc in the Articles array
+  Listing.find({}, function (error, doc) {
+    // Log any errors
+    if (error) {
+      console.log(error);
+    }
+    // Or send the doc to the browser as a json object
+    else {
+      res.json(doc);
+    }
+  });
+});
+
+// Grab an article by it's ObjectId
+app.get("/listings/:id", function (req, res) {
+  // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
+  Listing.findOne({
+      "_id": req.params.id
+    })
+    // ..and populate all of the notes associated with it
+    .populate("note")
+    // now, execute our query
+    .exec(function (error, doc) {
+      // Log any errors
+      if (error) {
+        console.log(error);
+      }
+      // Otherwise, send the doc to the browser as a json object
+      else {
+        res.json(doc);
+      }
+    });
+});
+
+
+// Create a new note or replace an existing note
+app.post("/listings/:id", function (req, res) {
+  // Create a new note and pass the req.body to the entry
+  var newNote = new Note(req.body);
+
+  // And save the new note the db
+  newNote.save(function (error, doc) {
+    // Log any errors
+    if (error) {
+      console.log(error);
+    }
+    // Otherwise
+    else {
+      // Use the article id to find and update it's note
+      Listing.findOneAndUpdate({
+          "_id": req.params.id
+        }, {
+          "note": doc._id
+        })
+        // Execute the above query
+        .exec(function (err, doc) {
+          // Log any errors
+          if (err) {
+            console.log(err);
+          } else {
+            // Or send the document to the browser
+            res.send(doc);
+          }
+        });
+    }
+  });
 });
 
 
 // Listen on port 3000
-app.listen(3000, function() {
+app.listen(3000, function () {
   console.log("App running on port 3000!");
 });
-
-
-
-
-
-// DEPENDENCIES //
-
-// var express = require('express');
-// var app = express();
-// var bodyParser = require('body-parser');
-// var logger = require('morgan');
-// var mongoose = require('mongoose');
-// var request = require('request');
-// var cheerio = require('cheerio');
-//
-// app.use(logger('dev'));
-// app.use(bodyParser.urlencoded({
-//   extended: false
-// }));
-
-// PUBLIC STATIC DIRECTORY //
-
-// app.use(express.static('public'));
-
-
-// CONFIQ MONGOOSE DB //
-
-// mongoose.connect('mongodb://localhost/week18hw');
-// var db = mongoose.connection;
-//
-// db.on('error', function(err) {
-//   console.log('Mongoose Error: ', err);
-// });
-//
-// db.once('open', function() {
-//   console.log('Mongoose connection successful.');
-// });
-
-// NOTES & ARTICLES //
-
-// var Note = require('./models/Note.js');
-// var Article = require('./models/Article.js');
-
-// ROUTES //
-
-// app.get('/', function(req, res) {
-//   res.send(index.html);
-// });
-
-// SCRAPE WEBSIGHT //
-
-// app.get('/scrape', function(req, res) {
-//
-//   request('http://www.app.com/', function(error, response, html) {
-//     var $ = cheerio.load(html);
-//     $('li data-content-id').each(function(i, element) {
-
-    			// RESULTS EMPTY //
-
-				// var result = {};
-
-				// PROPERTIES //
-        //
-				// result.title = $(this).children('a').text();
-				// result.link = $(this).children('a').attr('href');
-
-				// ARTICLES for RESULTS //
-        //
-				// var entry = new Article (result);
-
-				// SAVE to DB //
-
-	// 			entry.save(function(err, doc) {
-  //
-	// 			  if (err) {
-	// 			    console.log(err);
-	// 			  }
-	// 			  else {
-	// 			    console.log(doc);
-	// 			  }
-	// 		});
-  //   	});
-  // });
-
- // SCRAPE COMPLETE //
-
-//   res.send("Scrape Complete");
-// });
-
-// SCRAPED ARTICLES from MONGODB //
-
-// app.get('/articles', function(req, res){
-
-	// ARTICLES ARRAY //
-
-// 	Article.find({}, function(err, doc){
-//
-// 		if (err){
-// 			console.log(err);
-// 		}
-// 		else {
-// 			res.json(doc);
-// 		}
-// 	});
-// });
-
-// OBJECT ID //
-//
-// app.get('/articles/:id', function(req, res){
-
-	// QUERY MATCH from DB //
-
-	// Article.findOne({'_id': req.params.id})
-
-	// TO NOTE //
-
-	// .populate('note')
-
-	// EXECUTE QUERY //
-
-// 	.exec(function(err, doc){
-//
-// 		if (err){
-// 			console.log(err);
-// 		}
-// 		else {
-// 			res.json(doc);
-// 		}
-// 	});
-// });
-
-
-// REPLACE NOTE //
-
-// app.post('/articles/:id', function(req, res){
-
-	// NEW NOTE //
-
-	// var newNote = new Note(req.body);
-
-	// NEW NOTE to DB //
-
-	// newNote.save(function(err, doc){
-  //
-	// 	if(err){
-	// 		console.log(err);
-	// 	}
-	// 	else {
-
-	// MATCH in DB //
-
-			// Article.findOneAndUpdate({'_id': req.params.id}, {'note':doc._id})
-
-	// EXECUTE QUERY //
-
-// 			.exec(function(err, doc){
-//
-// 				if (err){
-// 					console.log(err);
-// 				} else {
-//
-// 					res.send(doc);
-// 				}
-// 			});
-// 		}
-// 	});
-// });
-
-// PORT 3000 //
-//
-// app.listen(3000, function() {
-//   console.log('App running on port 3000!');
-// });
