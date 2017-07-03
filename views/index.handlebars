@@ -1,0 +1,35 @@
+{{!-- // Note to self used  05 -15-2017, 05-17-2017 (handlebar stuff) and 06-19 and 06-21-2017 exercises --}}
+
+
+<header>
+
+	<nav class="#d32f2f red darken-2" role="navigation">
+		<div class="nav-wrapper">
+			<a id="logo-container" href="/" class="brand-logo left"> Culture and Politics with Jezebel </a>
+			<ul id="nav-mobile" class="right hide-on-med-and-down">
+				<li><a href="/" id="scrapeArticles"> Scrape New Articles </a></li>
+			</ul>
+		</div>
+	</nav>
+
+</header>
+
+<div class="container">
+	<div class="row">
+		<div class="col s9">
+			<span id="articlesTitle"> Headlines </span>
+			<div id="articlesDiv">
+				{{> articles }}
+			</div>
+		</div>
+
+		<div class="col s3">
+			<span id="commentsTitle">Comments</span>
+			<div id="commentsDiv">
+				<div class="col s12">
+					<div id="notes"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,50 @@
+
+
+	header {
+		margin-bottom: 30px;
+	}
+
+	.body {
+		margin: 0;
+	}
+
+	nav {
+		padding-right: 60px;
+		padding-left: 60px;
+	}
+
+	#articlesDiv {
+		border-top: solid #ffffff 4px;
+		margin-left: -100px;
+	}
+
+	#commentsDiv {
+		border-top: solid #ffffff 4px;
+		margin-right: -100px;
+	}
+
+	#articlesTitle {
+		font-size: 20px;
+		margin-left: -100px;
+		padding-left: 5px;
+	}
+
+	#commentsTitle {
+		margin-right: -200px;
+		font-size: 20px;
+	}
+
+/*Not sure if I will use this*/
+
+	.horizontal {
+		height: 250px;
+	}
+
+	.article-title {
+		font-size: 20px;
+		font-weight: bold;
+	}
+
+	.input-field {
+		margin-top: -10px;
+	}
