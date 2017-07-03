@@ -5,6 +5,7 @@ var express = require("express");
 var bodyParser = require("body-parser");
 var logger = require("morgan");
 var dotenv = require("dotenv");
+var e
 // database ORM
 var mongoose = require("mongoose");
 // scraping tools
@@ -46,10 +47,11 @@ var exphbs = require("express-handlebars");
 
 // sets default view engine to handlebars
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+
 app.set("view engine", "handlebars");
 
-// hooks mongoose with the mongodb database (our db: jezebel)
-var mongoConfig = process.env.MONGODB_URI || "mongodb://localhost/jezebel";
+// connects mongoose with the mongodb database (our db: newsscraper)
+var mongoConfig = process.env.MONGODB_URI || "mongodb://localhost/newsscraper";
 mongoose.connect(mongoConfig);
 
 // saves our mongoose connection to db
@@ -60,12 +62,33 @@ db.on("error", function(error) {
   console.log("Mongoose Error: ", error);
 });
 
-// logs a success message
+// logs a success message once logged in to the db through mongoose
 db.once("open", function() {
   console.log("Mongoose connection successful.");
 });
 
-//  routes
+
+// COULDN''T GET THIS TO WORK ON HEROKU (and yes, I removed the other conncection above)
+// mongoose.connect("mongodb://heroku_qbjjrjm9:p141ir5l1ffqhn9cpk2oaj0nrc@ds145312.mlab.com:45312/heroku_qbjjrjm9");
+//
+// var db = mongoose.connection;
+//
+// db.on('error', function (err) {
+//   console.log('Mongoose Error: ', err);
+// });
+//
+// db.once('open', function () {
+//   console.log('Mongoose connection successful.');
+// });
+
+
+// Incorporate these routes into our app
+// app.use('/', routes);
+// app.use('/save', routes);
+// app.use('/delete', routes);
+
+
+ // routes
 app.use("/", routes);
 
 // listens on port
