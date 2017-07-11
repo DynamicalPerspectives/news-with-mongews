@@ -1,50 +1,148 @@
+html {
+  position: relative;
+  min-height: 100%;
+}
 
+body {
+  margin-bottom: 80px;
+  background-image: url("../images/paper.png");
+}
 
-	header {
-		margin-bottom: 30px;
-	}
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 80px;
+  color: white;
+  background-color: #2196f3;
+}
 
-	.body {
-		margin: 0;
-	}
+.navbar {
+  margin-bottom: 0;
+}
 
-	nav {
-		padding-right: 60px;
-		padding-left: 60px;
-	}
+.jumbotron {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  padding: 0;
+  font-family: "Cormorant SC";
+  box-shadow: 10px 5px 20px 2px lightslategrey;
+}
 
-	#articlesDiv {
-		border-top: solid #ffffff 4px;
-		margin-left: -100px;
-	}
+.jumbotron .overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: auto;
+  background: linear-gradient(#333, black);
+  opacity: 0.7;
+}
 
-	#commentsDiv {
-		border-top: solid #ffffff 4px;
-		margin-right: -100px;
-	}
+.jumbotron .background-image {
+  height: 100%;
+  background-image: url("../images/newspaper.jpg");
+  background-size: cover;
+}
 
-	#articlesTitle {
-		font-size: 20px;
-		margin-left: -100px;
-		padding-left: 5px;
-	}
+.jumbotron .caption {
+  position: absolute;
+  top: 30%;
+  width: 100%;
+  text-align: center;
+}
 
-	#commentsTitle {
-		margin-right: -200px;
-		font-size: 20px;
-	}
+.jumbotron .caption h1,
+.jumbotron .caption p {
+  color: white;
+}
 
-/*Not sure if I will use this*/
+.jumbotron h1 {
+  font-size: 80px;
+  font-weight: 800;
+}
 
-	.horizontal {
-		height: 250px;
-	}
+.jumbotron p {
+  font-size: 30px;
+}
 
-	.article-title {
-		font-size: 20px;
-		font-weight: bold;
-	}
+.panel {
+  border-radius: 0;
+  box-shadow: 3px 3px 20px lightslategrey;
+}
 
-	.input-field {
-		margin-top: -10px;
-	}
+.panel.panel-default .panel-heading {
+  background-color: #2196f3;
+}
+
+.panel.panel-default .panel-heading h3 {
+  color: white;
+}
+
+.panel.panel-default .panel-heading .btn {
+  float: right;
+  margin-right: 5px;
+  margin-bottom: 50px;
+  margin-left: 5px;
+}
+
+.panel.panel-default .panel-body {
+  font-size: 16px;
+}
+
+.footer > .container > p {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 5px;
+  padding-bottom: 5px;
+  padding-left: 10px;
+  margin: 0;
+  font-weight: 800;
+  background: #0c7cd5;
+}
+
+.navbar-nav > li > a.scrape-new {
+  padding: 10px;
+  margin-top: 10px;
+  font-weight: 800;
+  color: white;
+}
+
+.navbar-nav > li > a.scrape-new:hover {
+  background: #4caf50;
+}
+
+.navbar-nav > li > a.scrape-new:active {
+  background: #e51c23;
+}
+
+.scrape-new {
+  cursor: pointer;
+}
+
+.m-top-80 {
+  margin-top: 80px;
+}
+
+textarea {
+  padding: 10px;
+  resize: none;
+}
+
+.bootbox-body .btn {
+  float: right;
+  margin: 5px;
+}
+
+.note.list-group-item {
+  padding: 30px;
+}
+
+.note.list-group-item .btn {
+  position: relative;
+  bottom: 10px;
+}

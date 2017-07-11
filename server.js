@@ -1,97 +1,60 @@
-// {{!-- // Note to self used  05 -15-2017, 05-17-2017 (handlebar stuff) and 06-19 and 06-21-2017 exercises for all of mongo stuff --}}
+// Web Scraper Homework Solution Example
+// (be sure to watch the video to see
+// how to operate the site in the browser)
+// -/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/-/
 
-// dependencies
+// Require our dependencies
 var express = require("express");
-var bodyParser = require("body-parser");
-var logger = require("morgan");
-var dotenv = require("dotenv");
-var e
-// database ORM
 var mongoose = require("mongoose");
-// scraping tools
-var request = require("request");
-var cheerio = require("cheerio");
+var expressHandlebars = require("express-handlebars");
+var bodyParser = require("body-parser");
 
-// models needed
-var Articles = require("./models/articles.js");
-var Comments = require("./models/comments.js");
+// Set up our port to be either the host's designated port, or 3000
+var PORT = process.env.PORT || 3000;
 
-// imports routes
-var routes = require("./controllers/article_controller.js");
-
-// loads environment variables from .env file into process.env
-dotenv.load();
-
-// sets mongoose to leverage Promises
-mongoose.Promise = Promise;
-
-// sets port
-var port = process.env.PORT || 3000;
-
-// initializes express
+// Instantiate our Express App
 var app = express();
 
-// logs requests to the console
-app.use(logger("dev"));
+// Set up an Express Router
+var router = express.Router();
 
-// parses data
+// Require our routes file pass our router object
+require("./config/routes")(router);
+
+// Designate our public folder as a static directory
+app.use(express.static(__dirname + "/public"));
+
+// Connect Handlebars to our Express app
+app.engine("handlebars", expressHandlebars({
+  defaultLayout: "main"
+}));
+app.set("view engine", "handlebars");
+
+// Use bodyParser in our app
 app.use(bodyParser.urlencoded({
   extended: false
 }));
 
-// / makes public a static dir
-app.use(express.static("public"));
+// Have every request go through our router middleware
+app.use(router);
 
-// sets Handlebars
-var exphbs = require("express-handlebars");
 
-// sets default view engine to handlebars
-app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+// If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
+var db = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
 
-app.set("view engine", "handlebars");
-
-// connects mongoose with the mongodb database (our db: newsscraper)
-var mongoConfig = process.env.MONGODB_URI || "mongodb://localhost/newsscraper";
-mongoose.connect(mongoConfig);
-
-// saves our mongoose connection to db
-var db = mongoose.connection;
-
-// shows any mongoose errors
-db.on("error", function(error) {
-  console.log("Mongoose Error: ", error);
+// Connect mongoose to our database
+mongoose.connect(db, function(error) {
+  // Log any errors connecting with mongoose
+  if (error) {
+    console.log(error);
+  }
+  // Or log a success message
+  else {
+    console.log("mongoose connection is successful");
+  }
 });
 
-// logs a success message once logged in to the db through mongoose
-db.once("open", function() {
-  console.log("Mongoose connection successful.");
-});
-
-
-// COULDN''T GET THIS TO WORK ON HEROKU (and yes, I removed the other conncection above)
-// mongoose.connect("mongodb://heroku_qbjjrjm9:p141ir5l1ffqhn9cpk2oaj0nrc@ds145312.mlab.com:45312/heroku_qbjjrjm9");
-//
-// var db = mongoose.connection;
-//
-// db.on('error', function (err) {
-//   console.log('Mongoose Error: ', err);
-// });
-//
-// db.once('open', function () {
-//   console.log('Mongoose connection successful.');
-// });
-
-
-// Incorporate these routes into our app
-// app.use('/', routes);
-// app.use('/save', routes);
-// app.use('/delete', routes);
-
-
- // routes
-app.use("/", routes);
-
-// listens on port
-app.listen(port, function() {
-	console.log("Listening on " + port);
+// Listen on the port
+app.listen(PORT, function() {
+  console.log("Listening on port:" + PORT);
 });
